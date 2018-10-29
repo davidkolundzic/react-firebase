@@ -29,7 +29,7 @@ class EventListItem extends Component {
         </Segment>
         <Segment secondary>
           <List horizontal>
-              {event.attendees.map((att)=>(
+              {event.attendees && event.attendees.map((att)=>(
                   <EventListAttendee key={att.id}  attendee={att}/>
                   ))} </List>
         </Segment>

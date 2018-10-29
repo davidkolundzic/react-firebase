@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { Grid, Button } from "semantic-ui-react";
+import cuid from "cuid";
 import EventList from "../EventList/EventList";
 import EventForm from "../EventForm/EventForm";
 
@@ -55,11 +56,11 @@ const eventsDashboard = [
 ];
 
 class EventDashboard extends Component {
-    state = {
-      events: eventsDashboard,
-      isOpen: false
-    };
-    // this.handleFormOpen = this.handleFormOpen.bind(this);
+  state = {
+    events: eventsDashboard,
+    isOpen: false
+  };
+  // this.handleFormOpen = this.handleFormOpen.bind(this);
 
   /** Na ovaj način prosljeđujem parametar iz html-a ako treba */
   handleFormOpen = () => {
@@ -67,7 +68,16 @@ class EventDashboard extends Component {
   };
   handleCancel = () => {
     this.setState({ isOpen: false });
-  }
+  };
+  handleCreateEvent = newEvent => {
+    newEvent.id = cuid();
+    newEvent.hostPhotoURL = "/assets/user.png";
+    const updatedEvents = [...this.state.events, newEvent];
+    this.setState({
+      events: updatedEvents,
+      isOpen: false
+    });
+  };
 
   render() {
     return (
@@ -80,10 +90,13 @@ class EventDashboard extends Component {
             <Button
               positive
               content="Create Event"
-              onClick={ this.handleFormOpen }
+              onClick={this.handleFormOpen}
             />
             {this.state.isOpen && (
-              <EventForm handleCancel={this.handleCancel} />
+              <EventForm
+                createEvent={this.handleCreateEvent}
+                handleCancel={this.handleCancel}
+              />
             )}
           </Grid.Column>
         </Grid>
