@@ -1,6 +1,6 @@
 import React from 'react'
 import { Grid } from "semantic-ui-react";
-import { Switch, Route, NavLink, Link } from "react-router-dom";
+import { Switch, Route, Redirect, NavLink, Link } from "react-router-dom";
 import SettingsNav from './SettingsNav';
 import BasicPage from './BasicPage';
 import AboutPage from './AboutPage';
@@ -12,7 +12,8 @@ const SettingsDashboard = () => {
     <Grid>
       <Grid.Column width={12}>
         <Switch>
-          <Route path='/settings/basics' component={BasicPage}></Route>
+          <Redirect exact from='/settings' to='/settings/about'></Redirect>
+          <Route path='/settings/basic' component={BasicPage}></Route>
           <Route path='/settings/about' component={AboutPage}></Route>
           <Route path='/settings/photos' component={PhotosPage}></Route>
           <Route path='/settings/account' component={AccountPage}></Route>
