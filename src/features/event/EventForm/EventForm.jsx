@@ -1,3 +1,4 @@
+/*global google*/
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { reduxForm, Field } from 'redux-form';
@@ -10,6 +11,12 @@ import TextInput from '../../../app/common/form/TextInput';
 import TextArea from '../../../app/common/form/TextArea';
 import SelectInput from '../../../app/common/form/SelectInput';
 import DateInput from '../../../app/common/form/DateInput';
+import PlaceInput from '../../../app/common/form/PlaceInput';
+import Script from "react-load-script";
+import PlacesAutocomplete, {
+  geocodeByAddress,
+  getLatLng
+} from "react-places-autocomplete";
 
 const mapState = (state, ownProps) => {
   const eventId = ownProps.match.params.id;
@@ -48,9 +55,37 @@ const validate= combineValidators({
 })
 
 class EventForm extends Component {
-
+state={
+  cityLatLng:{},
+  venueLatLng:{},
+  scriptsLoaded:false
+}
+handleScriptLoad = () => {
+  this.setState({ scriptsLoaded: true });
+};
+handleCitySelect=(selectedCity)=> {
+  geocodeByAddress(selectedCity)
+  .then(results => getLatLng(results[0]))
+  .then(latlng=>{
+    this.setState({cityLatLng:latlng})
+  })
+  .then(()=> {
+    this.props.change('city', selectedCity)
+  })
+}
+handleVenueSelect=(selectedVenue)=> {
+  geocodeByAddress(selectedVenue)
+  .then(results => getLatLng(results[0]))
+  .then(latlng=>{
+    this.setState({venueLatLng:latlng})
+  })
+  .then(()=> {
+    this.props.change('venue', selectedVenue)
+  })
+}
   onFormSubmit = values => {
     values.date=moment(values.date).format();
+    values.venueLatLng = this.state.venueLatLng;
     if (this.props.initialValues.id) {
       this.props.updateEvent(values);
       this.props.history.goBack();
@@ -71,6 +106,10 @@ class EventForm extends Component {
     const{invalid, submitting, pristine}=this.props
     return (
       <Grid>
+      {/* <Script
+          url="https://maps.googleapis.com/maps/api/js?key=AIzaSyDYjhvBnLBL-NbvYbKcLbGAZZ7dhXDqBrg&libraries=places"
+          onLoad={this.handleScriptLoad}
+        /> */}
         <Grid.Column width={10}>
           <Segment>
             <Header sub color='teal' content='Event Details'></Header>
@@ -99,17 +138,25 @@ class EventForm extends Component {
               <Header sub color="teal" content='Event Location Details'/>
               <Field
                 name="city"
-                type="text"
-               
-                component={TextInput}
+                type="text"               
+                component={PlaceInput}
                 placeholder="Event City"
+                options={{types:['(cities)']}}
+                onSelect={this.handleCitySelect}
               />
-              <Field
+
+              {this.state.scriptsLoaded && <Field
                 name="venue"
                 type="text"
-                component={TextInput}
+                options={{
+                  location: new google.maps.LatLng(this.state.cityLatLng),
+                  radius:1000,
+                  types:['establishment']
+                  }}
+                component={PlaceInput}
                 placeholder="Event Venue"
-              />
+                onSelect={this.handleVenueSelect}
+              />}
               <Field
                 name="date"
                 type="text"
